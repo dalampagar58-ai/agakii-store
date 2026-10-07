@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGAKII STORE</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#080808;color:#fff}
+    header{padding:28px 18px;text-align:center;background:linear-gradient(135deg,#180000,#090909);border-bottom:1px solid #2b2b2b}
+    h1{margin:0;font-size:34px;letter-spacing:2px}header p{color:#aaa;margin:8px 0 0}
+    main{max-width:1100px;margin:auto;padding:24px 16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+    .card{background:#111;border:1px solid #292929;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px #0008}
+    .photo{width:100%;height:210px;object-fit:cover;background:#181818}.body{padding:16px}
+    .name{font-size:19px;font-weight:700}.price{font-size:21px;font-weight:800;margin:10px 0;color:#ff3b30}
+    .desc{color:#aaa;line-height:1.5;min-height:45px}.status{display:inline-block;padding:6px 10px;border-radius:99px;font-size:12px;font-weight:700}
+    .ready{background:#123b22;color:#69f19a}.sold{background:#421616;color:#ff8585}
+    .buy{display:block;text-align:center;text-decoration:none;margin-top:14px;padding:12px;border-radius:10px;background:#fff;color:#000;font-weight:800}
+    .disabled{background:#333;color:#888}.empty{text-align:center;color:#888;padding:50px}
+  </style>
+</head>
+<body>
+<header><h1>AGAKII STORE</h1><p>Jual beli akun game</p></header>
+<main><div id="grid" class="grid"></div></main>
+<script>
+const WA = "6285879025221";
+const rupiah = n => new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
+async function load(){
+  const products = await fetch("/api/products").then(r=>r.json());
+  const grid=document.getElementById("grid");
+  if(!products.length){grid.innerHTML='<div class="empty">Belum ada stok.</div>';return}
+  grid.innerHTML=products.map(p=>`
+    <article class="card">
+      ${p.image ? `<img class="photo" src="${p.image}" alt="">` : `<div class="photo"></div>`}
+      <div class="body">
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="price">${rupiah(p.price)}</div>
+        <div class="desc">${escapeHtml(p.description||"")}</div>
+        <span class="status ${p.status==="READY"?"ready":"sold"}">${p.status}</span>
+        ${p.status==="READY"
+          ? `<a class="buy" href="https://wa.me/${WA}?text=${encodeURIComponent("Halo AGAKII STORE, saya mau membeli "+p.name)}">BELI SEKARANG</a>`
+          : `<div class="buy disabled">SOLD OUT</div>`}
+      </div>
+    </article>`).join("");
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+load();
+</script>
+</body>
+</html>
